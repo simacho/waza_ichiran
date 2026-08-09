@@ -1,0 +1,6 @@
+{
+  "name": "技一覧",
+  "description": "武道や格闘技の技一覧・動画閲覧・級段位別フィルタリングアプリ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
