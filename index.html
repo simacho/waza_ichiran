@@ -617,7 +617,57 @@
     }
 
     const INITIAL_TECHNIQUES = parseCsvToTechniques(RAW_CSV_TEXT);
-    const LOCAL_STORAGE_KEY = 'aistudio_techniques_v11';
+    const LOCAL_STORAGE_KEY = 'aistudio_techniques_v13_prod';
+
+    // 文字列の正規化（全角・半角、カタカナ・ひらがな、漢数字・丸数字、スペース除去など）
+    function normalizeText(str) {
+      if (!str) return '';
+      return String(str)
+        .normalize('NFKC')
+        .toLowerCase()
+        .replace(/[\s\t\n\r　]+/g, '')
+        .replace(/[①１1一]/g, '1')
+        .replace(/[②２2二]/g, '2')
+        .replace(/[③３3三]/g, '3')
+        .replace(/[④４4四]/g, '4')
+        .replace(/[⑤５5五]/g, '5')
+        .replace(/ヵ|カ|か/g, '力');
+    }
+
+    // 保存済みデータの読み込み（動画URLや基本属性は常に最新CSVを優先しつつ、習得・お気に入り状態を復元）
+    function loadSavedTechniques() {
+      try {
+        const savedJson = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedJson) {
+          const savedList = JSON.parse(savedJson);
+          if (Array.isArray(savedList)) {
+            const savedStateMap = new Map();
+            savedList.forEach((t) => {
+              if (t && t.id) {
+                savedStateMap.set(String(t.id), {
+                  isMastered: Boolean(t.isMastered),
+                  isFavorite: Boolean(t.isFavorite)
+                });
+              }
+            });
+
+            const merged = INITIAL_TECHNIQUES.map((t) => {
+              const savedState = savedStateMap.get(String(t.id));
+              return savedState ? { ...t, ...savedState } : t;
+            });
+
+            const customTechs = savedList.filter(
+              (t) => t && t.id && String(t.id).startsWith('custom-')
+            );
+
+            return [...merged, ...customTechs];
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load saved techniques:', e);
+      }
+      return INITIAL_TECHNIQUES;
+    }
 
     const INITIAL_NOTIFICATIONS = [
       {
@@ -710,31 +760,39 @@
       return (
         <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-2.5 items-center justify-between">
           <div className="relative w-full md:w-80">
-            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
-              type="text"
+              type="search"
+              inputMode="search"
+              enterKeyHint="search"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={searchMode}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="技名・持ち手・動画URL等で検索..."
-              className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003d9b]/30 focus:border-[#003d9b] transition-all"
+              className="w-full pl-9 pr-8 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003d9b]/30 focus:border-[#003d9b] transition-all touch-manipulation"
             />
             {searchMode && (
               <button
+                type="button"
                 onClick={() => onSearchChange('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-md touch-manipulation active:bg-slate-200"
+                aria-label="検索クリア"
               >
                 <Icon name="x" className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-medium">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-medium w-full sm:w-auto justify-around sm:justify-start">
               {stanceOptions.map((opt) => (
                 <button
                   key={opt}
+                  type="button"
                   onClick={() => onStanceFilterChange(opt)}
-                  className={`px-3 py-1.5 rounded-md transition-all ${
+                  className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md transition-all touch-manipulation text-center ${
                     stanceFilter === opt
                       ? 'bg-[#003d9b] text-white font-bold shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
@@ -745,28 +803,32 @@
               ))}
             </div>
 
-            <button
-              onClick={onToggleFavoritesOnly}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-all ${
-                filterFavoritesOnly
-                  ? 'bg-amber-50 text-amber-700 border-amber-200 shadow-xs'
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              <Icon name="star" className={`w-3.5 h-3.5 ${filterFavoritesOnly ? 'text-amber-500 fill-amber-500' : 'text-slate-400'}`} />
-              <span>お気に入り</span>
-            </button>
-
-            {onExportCsv && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={onExportCsv}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-all"
-                title="表示中の技と動画リンクの対応表をCSVダウンロード"
+                type="button"
+                onClick={onToggleFavoritesOnly}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-all touch-manipulation ${
+                  filterFavoritesOnly
+                    ? 'bg-amber-50 text-amber-700 border-amber-200 shadow-xs'
+                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                }`}
               >
-                <Icon name="download" className="w-3.5 h-3.5 text-slate-500" />
-                <span>CSV出力</span>
+                <Icon name="star" className={`w-3.5 h-3.5 ${filterFavoritesOnly ? 'text-amber-500 fill-amber-500' : 'text-slate-400'}`} />
+                <span>お気に入り</span>
               </button>
-            )}
+
+              {onExportCsv && (
+                <button
+                  type="button"
+                  onClick={onExportCsv}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-all touch-manipulation"
+                  title="表示中の技と動画リンクの対応表をCSVダウンロード"
+                >
+                  <Icon name="download" className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="hidden sm:inline">CSV出力</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       );
@@ -783,23 +845,25 @@
             </div>
             {selectedGrade !== 'すべて' && (
               <button
+                type="button"
                 onClick={() => onSelectGrade('すべて')}
-                className="text-[11px] text-[#003d9b] hover:underline font-medium"
+                className="text-[11px] text-[#003d9b] hover:underline font-medium touch-manipulation p-0.5"
               >
                 すべての級を表示
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto sm:max-h-none sm:overflow-visible">
             {grades.map((g) => {
               const count = gradeCounts[g] || 0;
               const isSelected = selectedGrade === g;
               return (
                 <button
                   key={g}
+                  type="button"
                   onClick={() => onSelectGrade(g)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 touch-manipulation shrink-0 ${
                     isSelected
                       ? 'bg-gradient-to-r from-[#003d9b] to-[#1e5bb8] text-white shadow-sm'
                       : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200'
@@ -1320,13 +1384,7 @@
 
     // --- MAIN APP COMPONENT ---
     function App() {
-      const [techniques, setTechniques] = useState(() => {
-        try {
-          const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-          if (saved) return JSON.parse(saved);
-        } catch (e) {}
-        return INITIAL_TECHNIQUES;
-      });
+      const [techniques, setTechniques] = useState(() => loadSavedTechniques());
 
       const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
       const [selectedGrade, setSelectedGrade] = useState('すべて');
@@ -1361,34 +1419,41 @@
         return counts;
       }, [techniques]);
 
-      // Filtered techniques
+      // Filtered techniques (iOS Safari & Android Chrome 対応)
       const filteredTechniques = useMemo(() => {
         let list = [...techniques];
 
+        // 1. 級段位フィルター
         if (selectedGrade !== 'すべて') {
-          list = list.filter((t) =>
-            t.grades && t.grades.length > 0 ? t.grades.includes(selectedGrade) : t.grade === selectedGrade
-          );
+          list = list.filter((t) => {
+            if (t.grades && t.grades.length > 0) {
+              return t.grades.includes(selectedGrade);
+            }
+            return t.grade === selectedGrade;
+          });
         }
 
+        // 2. 立ち技・座り技フィルター
         if (stanceFilter === '立ち技のみ') {
-          list = list.filter((t) => !t.isSuwariWaza);
+          list = list.filter((t) => !t.isSuwariWaza && !(t.rawGrip && t.rawGrip.startsWith('※')));
         } else if (stanceFilter === '座り技のみ') {
-          list = list.filter((t) => t.isSuwariWaza);
+          list = list.filter((t) => t.isSuwariWaza || (t.rawGrip && t.rawGrip.startsWith('※')));
         }
 
+        // 3. お気に入りフィルター
         if (filterFavoritesOnly) {
           list = list.filter((t) => t.isFavorite);
         }
 
+        // 4. 検索クエリフィルター（ひらがな・カタカナ・全角半角・漢数字・数字の自動吸収正規化）
         if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase().trim();
-          list = list.filter((t) =>
-            t.displayName.toLowerCase().includes(q) ||
-            t.rawGrip.toLowerCase().includes(q) ||
-            t.name.toLowerCase().includes(q) ||
-            (t.videoUrl && t.videoUrl.toLowerCase().includes(q))
-          );
+          const q = normalizeText(searchQuery);
+          list = list.filter((t) => {
+            const targetStr = normalizeText(
+              `${t.displayName || ''} ${t.rawGrip || ''} ${t.grip || ''} ${t.name || ''} ${t.category || ''} ${t.numberLabel || ''} ${t.videoUrl || ''}`
+            );
+            return targetStr.includes(q);
+          });
         }
 
         return list;
