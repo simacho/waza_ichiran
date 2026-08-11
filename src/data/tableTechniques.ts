@@ -4,7 +4,7 @@ export const GRIP_CATEGORIES: GripType[] = [
   'すべて',
   '正面打ち',
   '横面打ち',
-  '片手打ち',
+  '片手持ち',
   '両手持ち',
   '肘持ち',
   '肩持ち',

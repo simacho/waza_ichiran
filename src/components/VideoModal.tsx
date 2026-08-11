@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, CheckCircle2, Star, Video, Layers } from 'lucide-react';
+import { X, CheckCircle2, Star, Video, Layers, ExternalLink } from 'lucide-react';
 import { Technique } from '../types';
 
 interface VideoModalProps {
@@ -23,7 +23,23 @@ export const VideoModal: React.FC<VideoModalProps> = ({
       : technique.name
   );
 
-  const isMp4Video = technique.videoUrl?.includes('.mp4');
+  const url = technique.videoUrl || '';
+  const isMp4 = url.includes('.mp4');
+  const isTwitter = url.includes('twitter.com') || url.includes('x.com');
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+
+  let youtubeEmbedUrl = '';
+  if (isYouTube) {
+    const watchMatch = url.match(/[?&]v=([^&]+)/);
+    if (watchMatch && watchMatch[1]) {
+      youtubeEmbedUrl = `https://www.youtube.com/embed/${watchMatch[1]}?autoplay=1`;
+    } else {
+      const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+      if (shortMatch && shortMatch[1]) {
+        youtubeEmbedUrl = `https://www.youtube.com/embed/${shortMatch[1]}?autoplay=1`;
+      }
+    }
+  }
 
   return (
     <div 
@@ -83,39 +99,90 @@ export const VideoModal: React.FC<VideoModalProps> = ({
           </div>
         </div>
 
-        {/* Media Player Area */}
+        {/* Media Area */}
         <div className="shrink-0 bg-slate-950 text-white">
           <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
-            <div className="w-full h-full relative group flex items-center justify-center">
-              {technique.videoUrl ? (
-                isMp4Video ? (
-                  <video
-                    src={technique.videoUrl}
-                    controls
-                    autoPlay
-                    className="w-full h-full object-contain bg-black"
-                  />
-                ) : (
-                  <iframe
-                    src={technique.videoUrl}
-                    title={`${displayTitle} 動画`}
-                    className="w-full h-full border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                )
-              ) : (
-                <div className="text-center p-6 text-slate-400">
-                  <Video className="w-12 h-12 mx-auto mb-2 opacity-50 text-slate-500" />
-                  <p className="text-sm font-medium">動画準備中</p>
+            {url ? (
+              isMp4 ? (
+                <video
+                  src={url}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain bg-black"
+                />
+              ) : isYouTube && youtubeEmbedUrl ? (
+                <iframe
+                  src={youtubeEmbedUrl}
+                  title={`${displayTitle} YouTube動画`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : isTwitter ? (
+                <div className="text-center p-6 bg-gradient-to-b from-slate-900 to-slate-950 w-full h-full flex flex-col items-center justify-center space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shadow-inner">
+                    <Video className="w-7 h-7" />
+                  </div>
+                  <div className="max-w-md px-4 space-y-1">
+                    <p className="text-base font-bold text-white">Twitter (X) 公式動画・解説ページ</p>
+                    <p className="text-xs text-slate-400">
+                      公式Twitter（@samurai_kaze）の演武・解説投稿リンクです。以下のボタンから直接動画をご視聴いただけます。
+                    </p>
+                  </div>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-bold text-sm rounded-xl shadow-lg hover:shadow-sky-500/25 transition-all"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Twitter (X) で動画を見る</span>
+                  </a>
                 </div>
-              )}
-            </div>
+              ) : (
+                <iframe
+                  src={url}
+                  title={`${displayTitle} ページ`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )
+            ) : (
+              <div className="text-center p-6 text-slate-400">
+                <Video className="w-12 h-12 mx-auto mb-2 opacity-50 text-slate-500" />
+                <p className="text-sm font-medium">動画・HTMLリンク準備中</p>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* HTML Link Action Bar */}
+        {url && (
+          <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="text-slate-600 font-medium">
+              {isTwitter ? (
+                <span>※ Twitter (X) 投稿ページのリンク（@samurai_kaze）</span>
+              ) : isYouTube ? (
+                <span>※ YouTube 公式解説動画</span>
+              ) : (
+                <span>※ 技参照HTMLリンク</span>
+              )}
+            </div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#003d9b] hover:bg-[#002d73] text-white font-bold rounded-lg transition-colors shadow-xs shrink-0"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>新しいタブで開く</span>
+            </a>
+          </div>
+        )}
+
         {/* Status Bar */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between">
           <button
             onClick={() => onToggleMastered(technique.id)}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold text-sm transition-all ${

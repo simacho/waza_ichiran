@@ -35,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Center Title */}
       <div className="flex items-center gap-2">
         <h1 className="text-xl sm:text-2xl font-bold text-[#003d9b] tracking-tight">
-          技一覧
+          塩田合気道・風
         </h1>
       </div>
 

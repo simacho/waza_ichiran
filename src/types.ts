@@ -1,10 +1,12 @@
 export type StanceType = 'すべて' | '立ち技' | '座り技(※)' | '半身半立ち' | 'その他';
 
+export type StanceFilterOption = 'all' | 'tachi' | 'suwari';
+
 export type GripType = 
   | 'すべて'
   | '正面打ち'
   | '横面打ち'
-  | '片手打ち'
+  | '片手持ち'
   | '両手持ち'
   | '肘持ち'
   | '肩持ち'
@@ -18,6 +20,7 @@ export type GripType =
 export type Grade = 
   | 'すべて'
   | '7・8級'
+  | '5・6級'
   | '6・5級'
   | '5級'
   | '4級'
@@ -43,11 +46,12 @@ export interface Technique {
   name: string; // e.g. "四方投げ"
   numberLabel?: string; // e.g. "①", "②", "○", "③"
   displayName?: string; // e.g. "正面打ち 四方投げ ①"
-  videoUrl?: string; // e.g. "./samurai_kaze/846731135153430529_1.mp4"
+  videoUrl?: string; // e.g. "https://x.com/samurai_kaze/status/..."
   imageUrl?: string; // HTML hotlinked image URL
   description: string;
   keyPoints: string[];
   grade: Grade;
+  grades?: Grade[];
   reading?: string;
   category?: Category;
   difficultyRating?: number;

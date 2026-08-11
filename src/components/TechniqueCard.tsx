@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlayCircle, CheckCircle2, Star, Video, Layers } from 'lucide-react';
+import { PlayCircle, CheckCircle2, Star, Video, Layers, ExternalLink } from 'lucide-react';
 import { Technique } from '../types';
 
 interface TechniqueCardProps {
@@ -57,8 +57,21 @@ export const TechniqueCard: React.FC<TechniqueCardProps> = ({
               </span>
             )}
 
-            {/* Grade Badge */}
-            {technique.grade && technique.grade !== 'すべて' && (
+            {/* Grade Badges */}
+            {technique.grades && technique.grades.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {technique.grades.slice(0, 3).map((g) => (
+                  <span key={g} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                    {g}
+                  </span>
+                ))}
+                {technique.grades.length > 3 && (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500">
+                    +{technique.grades.length - 3}
+                  </span>
+                )}
+              </div>
+            ) : technique.grade && technique.grade !== 'すべて' && (
               <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
                 {technique.grade}
               </span>
@@ -72,7 +85,7 @@ export const TechniqueCard: React.FC<TechniqueCardProps> = ({
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
         <button
           onClick={(e) => onToggleFavorite(e, technique.id)}
           className={`p-2 rounded-full transition-colors ${
@@ -83,20 +96,35 @@ export const TechniqueCard: React.FC<TechniqueCardProps> = ({
           <Star className={`w-4 h-4 ${technique.isFavorite ? 'fill-amber-400' : ''}`} />
         </button>
 
+        {/* Direct HTML Link Button (Opens in new tab) */}
+        {technique.videoUrl && (
+          <a
+            href={technique.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="p-2 text-slate-500 hover:text-[#003d9b] hover:bg-slate-100 rounded-lg transition-colors"
+            title="HTMLページを新しいタブで直接開く"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        )}
+
+        {/* Modal Player Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onSelect(technique);
           }}
-          className="flex items-center gap-1.5 text-[#003d9b] hover:text-[#002d73] font-semibold text-sm sm:text-base transition-all py-1.5 px-3 rounded-lg bg-blue-50/80 hover:bg-blue-100/80"
+          className="flex items-center gap-1.5 text-[#003d9b] hover:text-[#002d73] font-semibold text-xs sm:text-sm transition-all py-1.5 px-2.5 sm:px-3 rounded-lg bg-blue-50/80 hover:bg-blue-100/80"
         >
           {technique.videoUrl ? (
             <Video className="w-4 h-4 text-[#003d9b]" />
           ) : (
             <PlayCircle className="w-4 h-4 text-[#003d9b]" />
           )}
-          <span className="hidden sm:inline">動画再生</span>
-          <span className="sm:hidden">再生</span>
+          <span className="hidden sm:inline">再生・HTML</span>
+          <span className="sm:hidden">開く</span>
         </button>
       </div>
     </div>

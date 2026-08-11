@@ -2,29 +2,28 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/Header';
 import { SearchBar } from './components/SearchBar';
 import { GradeFilter } from './components/GradeFilter';
-import { GripFilter } from './components/GripFilter';
 import { TechniqueCard } from './components/TechniqueCard';
 import { VideoModal } from './components/VideoModal';
 import { AddTechniqueModal } from './components/AddTechniqueModal';
 import { StatsDrawer } from './components/StatsDrawer';
 import { NotificationsDrawer } from './components/NotificationsDrawer';
-import { Technique, Grade, GripType, NotificationItem } from './types';
-import { INITIAL_TECHNIQUES, ALL_GRADES, GRIP_CATEGORIES } from './data/techniques';
+import { Technique, Grade, NotificationItem, StanceFilterOption } from './types';
+import { INITIAL_TECHNIQUES, ALL_GRADES } from './data/techniques';
 import { Filter, Layers, BookOpen } from 'lucide-react';
 
-const LOCAL_STORAGE_KEY = 'aistudio_techniques_v2';
+const LOCAL_STORAGE_KEY = 'aistudio_techniques_v10';
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif-1',
-    title: '演武・審査技データの一括搭載完了',
+    title: '演武・審査技データテーブル一括更新',
     time: '本日 10:00',
     read: false,
-    content: '全200項目以上の技（正面打ち・横面打ち・片手打ち・両手持ち・肘持ち・肩持ち・胸持ち・後ろ技・座り技・武器取り等）の動画参照を反映しました。'
+    content: '少年級（少年7級〜少年初段）および一般級・段位（7・8級〜三段）の全対象技テーブルと演武動画URL（@samurai_kaze）を新構成データに更新しました。'
   },
   {
     id: 'notif-2',
-    title: '座り技(※)・持たせ方（グリップ）フィルタ機能を追加',
+    title: '座り技(※)・持たせ方（グリップ）フィルタ機能',
     time: '昨日',
     read: true,
     content: 'かかり手ごとの絞り込みや「座り技（※）」のワンタップ表示に対応しました。審査準備にご活用ください。'
@@ -47,8 +46,7 @@ export default function App() {
 
   // Filters & Search
   const [selectedGrade, setSelectedGrade] = useState<Grade>('すべて');
-  const [selectedCategory, setSelectedCategory] = useState<GripType>('すべて');
-  const [showSuwariOnly, setShowSuwariOnly] = useState<boolean>(false);
+  const [stanceFilter, setStanceFilter] = useState<StanceFilterOption>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState<boolean>(false);
 
@@ -77,20 +75,9 @@ export default function App() {
       if (g === 'すべて') {
         counts[g] = techniques.length;
       } else {
-        counts[g] = techniques.filter((t) => t.grade === g).length;
-      }
-    });
-    return counts;
-  }, [techniques]);
-
-  // Compute technique count per grip category
-  const gripCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    GRIP_CATEGORIES.forEach((cat) => {
-      if (cat === 'すべて') {
-        counts[cat] = techniques.length;
-      } else {
-        counts[cat] = techniques.filter((t) => t.grip === cat).length;
+        counts[g] = techniques.filter((t) =>
+          t.grades && t.grades.length > 0 ? t.grades.includes(g as Grade) : t.grade === g
+        ).length;
       }
     });
     return counts;
@@ -100,17 +87,19 @@ export default function App() {
   const filteredTechniques = useMemo(() => {
     return techniques.filter((tech) => {
       // Grade filter
-      if (selectedGrade !== 'すべて' && tech.grade !== selectedGrade) {
-        return false;
+      if (selectedGrade !== 'すべて') {
+        if (tech.grades && tech.grades.length > 0) {
+          if (!tech.grades.includes(selectedGrade)) return false;
+        } else if (tech.grade !== selectedGrade) {
+          return false;
+        }
       }
 
-      // Grip Category filter
-      if (selectedCategory !== 'すべて' && tech.grip !== selectedCategory) {
+      // Suwari-waza / Stance filter
+      if (stanceFilter === 'tachi' && tech.isSuwariWaza) {
         return false;
       }
-
-      // Suwari-waza filter
-      if (showSuwariOnly && !tech.isSuwariWaza) {
+      if (stanceFilter === 'suwari' && !tech.isSuwariWaza) {
         return false;
       }
 
@@ -127,13 +116,14 @@ export default function App() {
         const matchesGrip = tech.grip ? tech.grip.toLowerCase().includes(query) : false;
         const matchesRawGrip = tech.rawGrip ? tech.rawGrip.toLowerCase().includes(query) : false;
         const matchesGrade = tech.grade.toLowerCase().includes(query);
+        const matchesGradesArray = tech.grades ? tech.grades.some((g) => g.toLowerCase().includes(query)) : false;
 
-        return matchesName || matchesDisplay || matchesGrip || matchesRawGrip || matchesGrade;
+        return matchesName || matchesDisplay || matchesGrip || matchesRawGrip || matchesGrade || matchesGradesArray;
       }
 
       return true;
     });
-  }, [techniques, selectedGrade, selectedCategory, showSuwariOnly, showFavoritesOnly, searchTerm]);
+  }, [techniques, selectedGrade, stanceFilter, showFavoritesOnly, searchTerm]);
 
   // Handlers
   const handleToggleFavorite = (e?: React.MouseEvent, id?: string) => {
@@ -203,41 +193,34 @@ export default function App() {
             resultCount={filteredTechniques.length}
           />
 
-          {/* Grip/Category Filter Chips */}
-          <GripFilter
-            categories={GRIP_CATEGORIES}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            showSuwariOnly={showSuwariOnly}
-            onToggleSuwariOnly={() => setShowSuwariOnly(!showSuwariOnly)}
-            gripCounts={gripCounts}
-          />
-
           {/* Grade/Rank Filter Chips */}
           <GradeFilter
             grades={ALL_GRADES}
             selectedGrade={selectedGrade}
             onSelectGrade={setSelectedGrade}
             gradeCounts={gradeCounts}
+            stanceFilter={stanceFilter}
+            onSelectStanceFilter={setStanceFilter}
           />
 
           {/* Active Filter Indicators */}
-          {(showFavoritesOnly || selectedGrade !== 'すべて' || selectedCategory !== 'すべて' || showSuwariOnly || searchTerm) && (
+          {(showFavoritesOnly || selectedGrade !== 'すべて' || stanceFilter !== 'all' || searchTerm) && (
             <div className="flex items-center justify-between text-xs bg-blue-50/80 border border-blue-100 rounded-lg px-3 py-2 text-slate-700">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <Filter className="w-3.5 h-3.5 text-[#003d9b]" />
                 <span className="font-semibold text-slate-600">適用中の絞り込み:</span>
-                {selectedCategory !== 'すべて' && (
-                  <span className="font-bold text-[#003d9b] bg-white px-2 py-0.5 rounded border border-blue-200">
-                    持たせ方: {selectedCategory}
-                  </span>
-                )}
                 {selectedGrade !== 'すべて' && (
                   <span className="font-bold text-[#003d9b] bg-white px-2 py-0.5 rounded border border-blue-200">
                     級段位: {selectedGrade}
                   </span>
                 )}
-                {showSuwariOnly && (
+                {stanceFilter === 'tachi' && (
+                  <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                    <Layers className="w-3 h-3" />
+                    立ち技のみ
+                  </span>
+                )}
+                {stanceFilter === 'suwari' && (
                   <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
                     <Layers className="w-3 h-3" />
                     座り技(※)のみ
@@ -258,8 +241,7 @@ export default function App() {
               <button
                 onClick={() => {
                   setSelectedGrade('すべて');
-                  setSelectedCategory('すべて');
-                  setShowSuwariOnly(false);
+                  setStanceFilter('all');
                   setShowFavoritesOnly(false);
                   setSearchTerm('');
                 }}
@@ -293,8 +275,7 @@ export default function App() {
                 <button
                   onClick={() => {
                     setSelectedGrade('すべて');
-                    setSelectedCategory('すべて');
-                    setShowSuwariOnly(false);
+                    setStanceFilter('all');
                     setShowFavoritesOnly(false);
                     setSearchTerm('');
                   }}
@@ -311,7 +292,7 @@ export default function App() {
         <footer className="mt-auto border-t border-slate-200 bg-slate-50/80 px-4 py-3 text-center text-xs text-slate-500">
           <div className="flex items-center justify-center gap-1.5 font-medium text-slate-600">
             <BookOpen className="w-3.5 h-3.5 text-[#003d9b]" />
-            <span>武道演武・審査技データ参照システム</span>
+            <span>塩田合気道・風</span>
           </div>
         </footer>
       </div>
