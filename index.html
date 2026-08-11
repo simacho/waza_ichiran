@@ -12,11 +12,11 @@
   <!-- Tailwind CSS Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React 18 & ReactDOM 18 UMD -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin="anonymous"></script>
   <!-- React DOM 18 -->
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <!-- Babel Standalone for in-browser JSX compilation -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
   <style>
     * {
       -webkit-tap-highlight-color: transparent;
@@ -162,23 +162,13 @@
     };
 
     // --- DATA & TYPES ---
-    const ALL_GRADES = [
-      'すべて',
-      '7・8級',
-      '5・6級',
-      '4級',
-      '3級',
-      '2級',
-      '1級',
-      '初段',
-      '二段',
-      '三段',
-      '少年7級',
-      '少年5・6級',
-      '少年3・4級',
-      '少年2・1級',
-      '少年初段'
+    const GRADE_COLUMNS = [
+      '少年7級', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段',
+      '7・8級', '5・6級', '4級', '3級', '2級', '1級',
+      '初段', '二段', '三段'
     ];
+
+    const ALL_GRADES = ['すべて', ...GRADE_COLUMNS];
 
     const GRIP_CATEGORIES = [
       'すべて',
@@ -524,11 +514,51 @@
 305,２人取り,自由技,○,立ち技,２人取り 自由技 ○,https://x.com/smaurai_kaze/status/830781308271890433
 306,３人取り,自由技,○,立ち技,３人取り 自由技 ○,https://x.com/smaurai_kaze/status/923909586964201472`;
 
-    const GRADE_COLUMNS = [
-      '少年7級', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段',
-      '7・8級', '5・6級', '4級', '3級', '2級', '1級',
-      '初段', '二段', '三段'
-    ];
+    function inferGrades(rawGrip, name, stance, numberLabel) {
+      const gripStr = rawGrip || '';
+      const nameStr = name || '';
+
+      // 高段位・発展技 (後ろ技, 半身半立ち, 短刀, 剣, 複数人取り, 自由技)
+      if (
+        gripStr.includes('後ろ技') ||
+        gripStr.includes('半身半立ち') ||
+        gripStr.includes('短刀') ||
+        gripStr.includes('剣') ||
+        gripStr.includes('取り') ||
+        nameStr.includes('自由技')
+      ) {
+        return ['初段', '二段', '三段', '少年初段'];
+      }
+
+      // 上級・高難度技 (四ヵ条, 肘当て呼吸投げ, 正面突き, 胸持ち)
+      if (
+        nameStr.includes('四ヵ条') ||
+        nameStr.includes('肘当て呼吸投げ') ||
+        gripStr.includes('正面突き') ||
+        gripStr.includes('胸持ち')
+      ) {
+        return ['2級', '1級', '初段', '二段', '少年2・1級', '少年初段'];
+      }
+
+      // 中級技 (二ヵ条, 三ヵ条, 肩持ち, 両手持ち, 片手綾持ち)
+      if (
+        nameStr.includes('二ヵ条') ||
+        nameStr.includes('三ヵ条') ||
+        gripStr.includes('肩持ち') ||
+        gripStr.includes('両手持ち') ||
+        gripStr.includes('片手綾持ち')
+      ) {
+        return ['4級', '3級', '2級', '1級', '少年3・4級', '少年2・1級'];
+      }
+
+      // 初級基本技 (片手持ち, 正面打ちの一ヵ条・四方投げ・肘締め①等)
+      if (numberLabel === '①' || numberLabel === '1') {
+        return ['7・8級', '5・6級', '4級', '3級', '2級', '1級', '初段', '少年7級', '少年5・6級', '少年3・4級'];
+      }
+
+      // 標準技 (②区分、小手返し、側面入身投げ等)
+      return ['5・6級', '4級', '3級', '2級', '1級', '初段', '少年5・6級', '少年3・4級', '少年2・1級'];
+    }
 
     function parseCsvToTechniques(csvText) {
       const lines = csvText.trim().split('\n');
@@ -574,7 +604,7 @@
           videoUrl = videoUrl.replace('x.com/smaurai_kaze', 'x.com/samurai_kaze');
         }
 
-        const grades = [];
+        let grades = [];
         // Optional grade columns parsing if extra columns exist
         if (parts.length > 7) {
           for (let i = 0; i < GRADE_COLUMNS.length; i++) {
@@ -583,6 +613,10 @@
               grades.push(GRADE_COLUMNS[i]);
             }
           }
+        }
+
+        if (grades.length === 0) {
+          grades = inferGrades(rawGrip, name, stanceFromCsv, numberLabel);
         }
 
         const primaryGrade = grades.length > 0 ? grades[0] : '';
@@ -1642,10 +1676,65 @@
       );
     }
 
+    // Error Boundary
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+      componentDidCatch(error, errorInfo) {
+        console.error("App Error Boundary caught an error:", error, errorInfo);
+      }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+              <div className="bg-white p-6 rounded-2xl shadow-md max-w-md w-full text-center space-y-4 border border-slate-200">
+                <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                  !
+                </div>
+                <h2 className="text-base font-bold text-slate-800">アプリの表示で一時的な問題が発生しました</h2>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  表示データを再読み込みするか、データを初期化してお試しください。
+                </p>
+                <div className="flex flex-col gap-2 pt-2">
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="w-full py-2.5 bg-[#003d9b] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#002e75] transition-colors"
+                  >
+                    ページを再読み込み
+                  </button>
+                  <button
+                    onClick={() => {
+                      try {
+                        localStorage.clear();
+                      } catch (e) {}
+                      window.location.reload();
+                    }}
+                    className="w-full py-2 bg-slate-100 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-200 transition-colors"
+                  >
+                    キャッシュデータをリセット
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
     // Render Root
     const rootElement = document.getElementById('root');
     const root = ReactDOM.createRoot(rootElement);
-    root.render(<App />);
+    root.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
   </script>
 </body>
 </html>
