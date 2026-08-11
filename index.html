@@ -51,6 +51,7 @@
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen">
   <div id="root"></div>
 
+  <script src="./csvData.js"></script>
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
@@ -163,7 +164,7 @@
 
     // --- DATA & TYPES ---
     const GRADE_COLUMNS = [
-      '少年7級', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段',
+      '少年7級', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段', '少年二段',
       '7・8級', '5・6級', '4級', '3級', '2級', '1級',
       '初段', '二段', '三段'
     ];
@@ -206,392 +207,177 @@
       '３人取り '
     ];
 
-    const RAW_CSV_TEXT = `No,持ち手,技名,①②区分,種別,技名表記,動画URL
-1,正面打ち,四方投げ,①,立ち技,正面打ち 四方投げ ①,https://x.com/samurai_kaze/status/846731135153430529
-2,正面打ち,四方投げ,②,立ち技,正面打ち 四方投げ ②,https://x.com/samurai_kaze/status/893871845371289600
-3,正面打ち,一ヵ条,①,立ち技,正面打ち 一ヵ条 ①,https://x.com/samurai_kaze/status/787567713224884224
-4,正面打ち,一ヵ条,②,立ち技,正面打ち 一ヵ条 ②,https://x.com/samurai_kaze/status/797389818313351172
-5,正面打ち,二ヵ条,①,立ち技,正面打ち 二ヵ条 ①,https://x.com/samurai_kaze/status/888979037841833984
-6,正面打ち,二ヵ条,②,立ち技,正面打ち 二ヵ条 ②,https://x.com/samurai_kaze/status/903923166212325377
-7,正面打ち,三ヵ条,①,立ち技,正面打ち 三ヵ条 ①,https://x.com/samurai_kaze/status/794547691711627264
-8,正面打ち,三ヵ条,②,立ち技,正面打ち 三ヵ条 ②,https://x.com/samurai_kaze/status/790193816623915008
-9,正面打ち,四ヵ条,①,立ち技,正面打ち 四ヵ条 ①,https://x.com/samurai_kaze/status/790195209451646977
-10,正面打ち,四ヵ条,②,立ち技,正面打ち 四ヵ条 ②,https://x.com/samurai_kaze/status/883925707860041728
-11,正面打ち,側面入身投げ,①,立ち技,正面打ち 側面入身投げ ①,https://x.com/samurai_kaze/status/926367864877019139
-12,正面打ち,側面入身投げ,②,立ち技,正面打ち 側面入身投げ ②,https://x.com/samurai_kaze/status/881768504768184321
-13,正面打ち,正面入身投げ,①,立ち技,正面打ち 正面入身投げ ①,https://x.com/samurai_kaze/status/863774603528642564
-14,正面打ち,正面入身投げ,②,立ち技,正面打ち 正面入身投げ ②,https://x.com/samurai_kaze/status/842057417412112384
-15,正面打ち,肘締め,①,立ち技,正面打ち 肘締め ①,https://x.com/samurai_kaze/status/883242980202565632
-16,正面打ち,肘締め,②,立ち技,正面打ち 肘締め ②,https://x.com/samurai_kaze/status/912699893583536128
-17,正面打ち,肘当て呼吸投げ,①,立ち技,正面打ち 肘当て呼吸投げ ①,https://x.com/samurai_kaze/status/863370896961974272
-18,正面打ち,肘当て呼吸投げ,②,立ち技,正面打ち 肘当て呼吸投げ ②,https://x.com/samurai_kaze/status/863371926139322369
-19,正面打ち,小手返し,①,立ち技,正面打ち 小手返し ①,https://x.com/samurai_kaze/status/795165253126369280
-20,正面打ち,小手返し,②,立ち技,正面打ち 小手返し ②,https://x.com/samurai_kaze/status/801073254618185728
-21,正面打ち,呼吸投げ,○,立ち技,正面打ち 呼吸投げ ○,https://x.com/samurai_kaze/status/1122164896823529472
-22,正面打ち,自由技,○,立ち技,正面打ち 自由技 ○,https://x.com/samurai_kaze/status/1284862244354879488
-23,※正面打ち,一ヵ条,①,座り技,※正面打ち 一ヵ条 ①,https://x.com/samurai_kaze/status/887319361408479233
-24,※正面打ち,一ヵ条,②,座り技,※正面打ち 一ヵ条 ②,https://x.com/samurai_kaze/status/894230853798121472
-25,※正面打ち,二ヵ条,①,座り技,※正面打ち 二ヵ条 ①,https://x.com/samurai_kaze/status/1069153013736996864
-26,※正面打ち,二ヵ条,②,座り技,※正面打ち 二ヵ条 ②,https://x.com/samurai_kaze/status/1094482713170440192
-27,※正面打ち,三ヵ条,①,座り技,※正面打ち 三ヵ条 ①,https://x.com/samurai_kaze/status/844574175624814592
-28,※正面打ち,三ヵ条,②,座り技,※正面打ち 三ヵ条 ②,https://x.com/samurai_kaze/status/853605563619459074
-29,※正面打ち,四ヵ条,①,座り技,※正面打ち 四ヵ条 ①,https://x.com/samurai_kaze/status/885558653083828224
-30,※正面打ち,四ヵ条,②,座り技,※正面打ち 四ヵ条 ②,https://x.com/samurai_kaze/status/1097149734853140480
-31,※正面打ち,側面入身投げ,①,座り技,※正面打ち 側面入身投げ ①,https://x.com/samurai_kaze/status/1002885559608532992
-32,※正面打ち,側面入身投げ,②,座り技,※正面打ち 側面入身投げ ②,https://x.com/samurai_kaze/status/1117453507303362560
-33,※正面打ち,正面入身投げ,①,座り技,※正面打ち 正面入身投げ ①,https://x.com/samurai_kaze/status/865964936261795840
-34,※正面打ち,正面入身投げ,②,座り技,※正面打ち 正面入身投げ ②,https://x.com/samurai_kaze/status/903331483028303872
-35,※正面打ち,肘締め,①,座り技,※正面打ち 肘締め ①,https://x.com/samurai_kaze/status/1089182415606542337
-36,※正面打ち,肘締め,②,座り技,※正面打ち 肘締め ②,https://x.com/samurai_kaze/status/1117452992502833153
-37,※正面打ち,肘当て呼吸投げ,①,座り技,※正面打ち 肘当て呼吸投げ ①,https://x.com/samurai_kaze/status/1089178126989516800
-38,※正面打ち,肘当て呼吸投げ,②,座り技,※正面打ち 肘当て呼吸投げ ②,https://x.com/samurai_kaze/status/1089178929129172992
-39,※正面打ち,小手返し,①,座り技,※正面打ち 小手返し ①,https://x.com/samurai_kaze/status/836593013308579840
-40,※正面打ち,小手返し,②,座り技,※正面打ち 小手返し ②,https://x.com/samurai_kaze/status/902570549724844032
-41,横面打ち,四方投げ,①,立ち技,横面打ち 四方投げ ①,https://x.com/samurai_kaze/status/805329606597177344
-42,横面打ち,四方投げ,②,立ち技,横面打ち 四方投げ ②,https://x.com/samurai_kaze/status/810084470103547904
-43,横面打ち,一ヵ条,①,立ち技,横面打ち 一ヵ条 ①,https://x.com/samurai_kaze/status/809087191808757760
-44,横面打ち,一ヵ条,②,立ち技,横面打ち 一ヵ条 ②,https://x.com/samurai_kaze/status/817702126692372480
-45,横面打ち,二ヵ条,①,立ち技,横面打ち 二ヵ条 ①,https://x.com/samurai_kaze/status/1233680413735784448
-46,横面打ち,二ヵ条,②,立ち技,横面打ち 二ヵ条 ②,https://x.com/samurai_kaze/status/919164507162779649
-47,横面打ち,三ヵ条,①,立ち技,横面打ち 三ヵ条 ①,https://x.com/samurai_kaze/status/821775861498003456
-48,横面打ち,三ヵ条,②,立ち技,横面打ち 三ヵ条 ②,https://x.com/samurai_kaze/status/927184013210423296
-49,横面打ち,四ヵ条,①,立ち技,横面打ち 四ヵ条 ①,https://x.com/samurai_kaze/status/822755995021557762
-50,横面打ち,四ヵ条,②,立ち技,横面打ち 四ヵ条 ②,https://x.com/samurai_kaze/status/875482322807570432
-51,横面打ち,側面入身投げ,①,立ち技,横面打ち 側面入身投げ ①,https://x.com/samurai_kaze/status/824585579446706176
-52,横面打ち,側面入身投げ,②,立ち技,横面打ち 側面入身投げ ②,https://x.com/samurai_kaze/status/970339586541993984
-53,横面打ち,正面入身投げ,①,立ち技,横面打ち 正面入身投げ ①,https://x.com/samurai_kaze/status/800247998185816064
-54,横面打ち,正面入身投げ,②,立ち技,横面打ち 正面入身投げ ②,https://x.com/samurai_kaze/status/793452873778462721
-55,横面打ち,肘締め,①,立ち技,横面打ち 肘締め ①,https://x.com/samurai_kaze/status/812671972760948736
-56,横面打ち,肘締め,②,立ち技,横面打ち 肘締め ②,https://x.com/samurai_kaze/status/1058033503135133696
-57,横面打ち,肘当て呼吸投げ,①,立ち技,横面打ち 肘当て呼吸投げ ①,https://x.com/samurai_kaze/status/1003610605838712832
-58,横面打ち,肘当て呼吸投げ,②,立ち技,横面打ち 肘当て呼吸投げ ②,https://x.com/samurai_kaze/status/1003610605838712832
-59,横面打ち,小手返し,①,立ち技,横面打ち 小手返し ①,https://x.com/samurai_kaze/status/886253890319990786
-60,横面打ち,小手返し,②,立ち技,横面打ち 小手返し ②,https://x.com/samurai_kaze/status/962372481322381313
-61,横面打ち,呼吸投げ,○,立ち技,横面打ち 呼吸投げ ○,https://x.com/samurai_kaze/status/1122165315628978176
-62,横面打ち,自由技,○,立ち技,横面打ち 自由技 ○,https://x.com/samurai_kaze/status/1296493640815181824
-63,※横面打ち,一ヵ条,①,座り技,※横面打ち 一ヵ条 ①,https://x.com/samurai_kaze/status/952193891922460672
-64,※横面打ち,一ヵ条,②,座り技,※横面打ち 一ヵ条 ②,https://x.com/samurai_kaze/status/1061651442329542656
-65,※横面打ち,二ヵ条,①,座り技,※横面打ち 二ヵ条 ①,https://x.com/samurai_kaze/status/1058677701253324800
-66,※横面打ち,二ヵ条,②,座り技,※横面打ち 二ヵ条 ②,https://x.com/samurai_kaze/status/919165765181247489
-67,※横面打ち,三ヵ条,①,座り技,※横面打ち 三ヵ条 ①,https://x.com/samurai_kaze/status/1087158538764353536
-68,※横面打ち,三ヵ条,②,座り技,※横面打ち 三ヵ条 ②,https://x.com/samurai_kaze/status/904262648191041540
-69,※横面打ち,四ヵ条,①,座り技,※横面打ち 四ヵ条 ①,https://x.com/samurai_kaze/status/1114539451890319361
-70,※横面打ち,四ヵ条,②,座り技,※横面打ち 四ヵ条 ②,https://x.com/samurai_kaze/status/950074744497319936
-71,※横面打ち,側面入身投げ,,座り技,※横面打ち 側面入身投げ,
-72,※横面打ち,側面入身投げ,②,座り技,※横面打ち 側面入身投げ ②,https://x.com/samurai_kaze/status/934803189508947969
-73,※横面打ち,正面入身投げ,①,座り技,※横面打ち 正面入身投げ ①,https://x.com/samurai_kaze/status/1497902119118327812?cxt=HHwWiMDS5dCCz8kpAAAA
-74,※横面打ち,正面入身投げ,②,座り技,※横面打ち 正面入身投げ ②,https://x.com/samurai_kaze/status/870322021904678912
-75,※横面打ち,肘締め,①,座り技,※横面打ち 肘締め ①,https://x.com/samurai_kaze/status/1101861743209283584
-76,※横面打ち,肘締め,②,座り技,※横面打ち 肘締め ②,https://x.com/samurai_kaze/status/1175792119702667265
-77,※横面打ち,肘当て呼吸投げ,①,座り技,※横面打ち 肘当て呼吸投げ ①,https://x.com/samurai_kaze/status/1308096955520745472
-78,※横面打ち,肘当て呼吸投げ,②,座り技,※横面打ち 肘当て呼吸投げ ②,https://x.com/samurai_kaze/status/1308097174123630592
-79,※横面打ち,小手返し,①,座り技,※横面打ち 小手返し ①,https://x.com/samurai_kaze/status/1082284786100559875
-80,※横面打ち,小手返し,②,座り技,※横面打ち 小手返し ②,https://x.com/samurai_kaze/status/1140278667991371776
-81,片手持ち,四方投げ,①,立ち技,片手持ち 四方投げ ①,https://x.com/samurai_kaze/status/789766668616552448
-82,片手持ち,四方投げ,②,立ち技,片手持ち 四方投げ ②,https://x.com/samurai_kaze/status/793845541536796673
-83,片手持ち,一ヵ条,①,立ち技,片手持ち 一ヵ条 ①,https://x.com/samurai_kaze/status/823915158703476736
-84,片手持ち,一ヵ条,②,立ち技,片手持ち 一ヵ条 ②,https://x.com/samurai_kaze/status/823913640474488832
-85,片手持ち,二ヵ条,①,立ち技,片手持ち 二ヵ条 ①,https://x.com/samurai_kaze/status/796020927116943360
-86,片手持ち,二ヵ条,②,立ち技,片手持ち 二ヵ条 ②,https://x.com/samurai_kaze/status/798923403814006787
-87,片手持ち,三ヵ条,①,立ち技,片手持ち 三ヵ条 ①,https://x.com/samurai_kaze/status/952666103955648512
-88,片手持ち,三ヵ条,②,立ち技,片手持ち 三ヵ条 ②,https://x.com/samurai_kaze/status/807838226111049728
-89,片手持ち,四ヵ条,①,立ち技,片手持ち 四ヵ条 ①,https://x.com/samurai_kaze/status/834045393105096705
-90,片手持ち,四ヵ条,②,立ち技,片手持ち 四ヵ条 ②,https://x.com/samurai_kaze/status/829987000081997824
-91,片手持ち,側面入身投げ,①,立ち技,片手持ち 側面入身投げ ①,https://x.com/samurai_kaze/status/794879147558350849
-92,片手持ち,側面入身投げ,②,立ち技,片手持ち 側面入身投げ ②,https://x.com/samurai_kaze/status/796364866839670784
-93,片手持ち,正面入身投げ,①,立ち技,片手持ち 正面入身投げ ①,https://x.com/samurai_kaze/status/817704142999146499
-94,片手持ち,正面入身投げ,②,立ち技,片手持ち 正面入身投げ ②,https://x.com/samurai_kaze/status/862690132712857600
-95,片手持ち,肘締め,①,立ち技,片手持ち 肘締め ①,https://x.com/samurai_kaze/status/899318925833326593
-96,片手持ち,肘締め,②,立ち技,片手持ち 肘締め ②,https://x.com/samurai_kaze/status/929393702736314368
-97,片手持ち,肘当て呼吸投げ,①,立ち技,片手持ち 肘当て呼吸投げ ①,https://x.com/samurai_kaze/status/843054052208394240
-98,片手持ち,肘当て呼吸投げ,②,立ち技,片手持ち 肘当て呼吸投げ ②,https://x.com/samurai_kaze/status/843054732579033090
-99,片手持ち,小手返し,①,立ち技,片手持ち 小手返し ①,https://x.com/samurai_kaze/status/797796351618600960
-100,片手持ち,小手返し,②,立ち技,片手持ち 小手返し ②,https://x.com/samurai_kaze/status/843350151653601280
-101,片手持ち,呼吸投げ,○,立ち技,片手持ち 呼吸投げ ○,https://x.com/samurai_kaze/status/1008370261576437761
-102,片手持ち,自由技,○,立ち技,片手持ち 自由技 ○,https://x.com/samurai_kaze/status/1447159535223775233
-103,※片手持ち,一ヵ条,,座り技,※片手持ち 一ヵ条,
-104,※片手持ち,一ヵ条,②,座り技,※片手持ち 一ヵ条 ②,https://x.com/samurai_kaze/status/954732294966730752
-105,※片手持ち,二ヵ条,①,座り技,※片手持ち 二ヵ条 ①,https://x.com/samurai_kaze/status/835435953778909186
-106,※片手持ち,二ヵ条,②,座り技,※片手持ち 二ヵ条 ②,https://x.com/samurai_kaze/status/1028663776336273408
-107,※片手持ち,三ヵ条,①,座り技,※片手持ち 三ヵ条 ①,https://x.com/samurai_kaze/status/1082285418547077120
-108,※片手持ち,三ヵ条,②,座り技,※片手持ち 三ヵ条 ②,https://x.com/samurai_kaze/status/1358065378237181955
-109,※片手持ち,四ヵ条,①,座り技,※片手持ち 四ヵ条 ①,https://x.com/samurai_kaze/status/932308845224796160
-110,※片手持ち,四ヵ条,②,座り技,※片手持ち 四ヵ条 ②,https://x.com/samurai_kaze/status/1030811576423526401
-111,※片手持ち,側面入身投げ,①,座り技,※片手持ち 側面入身投げ ①,https://x.com/samurai_kaze/status/839495600626262018
-112,※片手持ち,側面入身投げ,,座り技,※片手持ち 側面入身投げ,
-113,※片手持ち,正面入身投げ,①,座り技,※片手持ち 正面入身投げ ①,https://x.com/samurai_kaze/status/1462345869542318087
-114,※片手持ち,正面入身投げ,②,座り技,※片手持ち 正面入身投げ ②,https://x.com/samurai_kaze/status/1034054926333177856
-115,※片手持ち,肘締め,①,座り技,※片手持ち 肘締め ①,https://x.com/samurai_kaze/status/1139814661849673729
-116,※片手持ち,肘締め,,座り技,※片手持ち 肘締め,
-117,※片手持ち,肘当て呼吸投げ,①,座り技,※片手持ち 肘当て呼吸投げ ①,https://x.com/smaurai_kaze/status/1092050506367692800
-118,※片手持ち,肘当て呼吸投げ,②,座り技,※片手持ち 肘当て呼吸投げ ②,https://x.com/smaurai_kaze/status/1092051255633969154
-119,※片手持ち,小手返し,①,座り技,※片手持ち 小手返し ①,https://x.com/smaurai_kaze/status/1097150212814950401
-120,※片手持ち,小手返し,②,座り技,※片手持ち 小手返し ②,https://x.com/smaurai_kaze/status/1112002130842312704
-121,両手持ち,四方投げ,①,立ち技,両手持ち 四方投げ ①,https://x.com/smaurai_kaze/status/893535398424596481
-122,両手持ち,四方投げ,②,立ち技,両手持ち 四方投げ ②,https://x.com/smaurai_kaze/status/893537725252370432
-123,両手持ち,一ヵ条,①,立ち技,両手持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1084397552110206976
-124,両手持ち,一ヵ条,②,立ち技,両手持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/985840127346819072
-125,両手持ち,二ヵ条,①,立ち技,両手持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/806161601136971776
-126,両手持ち,二ヵ条,②,立ち技,両手持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/938066726113107969
-127,両手持ち,三ヵ条,①,立ち技,両手持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/916229807368691712
-128,両手持ち,三ヵ条,②,立ち技,両手持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/1051607509604036609
-129,両手持ち,四ヵ条,①,立ち技,両手持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/901833308144672768
-130,両手持ち,四ヵ条,②,立ち技,両手持ち 四ヵ条 ②,https://x.com/smaurai_kaze/status/1051769301642797056
-131,両手持ち,側面入身投げ,①,立ち技,両手持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/1044898185636761600
-132,両手持ち,側面入身投げ,②,立ち技,両手持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1054473913084723200
-133,両手持ち,正面入身投げ,①,立ち技,両手持ち 正面入身投げ ①,https://x.com/smaurai_kaze/status/1006138242771456003
-134,両手持ち,正面入身投げ,②,立ち技,両手持ち 正面入身投げ ②,https://x.com/smaurai_kaze/status/881187693165649920
-135,両手持ち,肘締め,①,立ち技,両手持ち 肘締め ①,https://x.com/smaurai_kaze/status/965243135088476160
-136,両手持ち,肘締め,②,立ち技,両手持ち 肘締め ②,https://x.com/smaurai_kaze/status/896337487273967616
-137,両手持ち,肘当て呼吸投げ,①,立ち技,両手持ち 肘当て呼吸投げ ①,https://x.com/smaurai_kaze/status/1069150252777652229
-138,両手持ち,肘当て呼吸投げ,②,立ち技,両手持ち 肘当て呼吸投げ ②,https://x.com/smaurai_kaze/status/1069148836319252481
-139,両手持ち,小手返し,①,立ち技,両手持ち 小手返し ①,https://x.com/smaurai_kaze/status/843517183799963648
-140,両手持ち,小手返し,②,立ち技,両手持ち 小手返し ②,https://x.com/smaurai_kaze/status/853533011865776128
-141,両手持ち,天地投げ,①,立ち技,両手持ち 天地投げ ①,https://x.com/smaurai_kaze/status/826851447069302784
-142,両手持ち,天地投げ,②,立ち技,両手持ち 天地投げ ②,https://x.com/smaurai_kaze/status/841692992842870787
-143,両手持ち,小手返し,①,立ち技,両手持ち 小手返し ①,https://x.com/smaurai_kaze/status/1094586918690418690
-144,両手持ち,小手返し,②,立ち技,両手持ち 小手返し ②,https://x.com/smaurai_kaze/status/823199758244118528
-145,両手持ち,座り技呼吸法,③,立ち技,両手持ち 座り技呼吸法 ③,https://x.com/smaurai_kaze/status/1180510542722584576
-146,両手持ち,座り技呼吸法,④,立ち技,両手持ち 座り技呼吸法 ④,https://x.com/smaurai_kaze/status/1143535743643480065
-147,両手持ち,座り技呼吸法,⑤,立ち技,両手持ち 座り技呼吸法 ⑤,
-148,両手持ち,呼吸投げ,○,立ち技,両手持ち 呼吸投げ ○,https://x.com/smaurai_kaze/status/1064166344709427200
-149,両手持ち,自由技,○,立ち技,両手持ち 自由技 ○,
-150,※両手持ち,一ヵ条,①,座り技,※両手持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/965264832889946112
-151,※両手持ち,一ヵ条,②,座り技,※両手持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/1078021536089395200
-152,※両手持ち,二ヵ条,,座り技,※両手持ち 二ヵ条,
-153,※両手持ち,二ヵ条,②,座り技,※両手持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/1223553869751279617
-154,※両手持ち,三ヵ条,,座り技,※両手持ち 三ヵ条,
-155,※両手持ち,三ヵ条,②,座り技,※両手持ち 三ヵ条 ②,
-156,※両手持ち,四ヵ条,①,座り技,※両手持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/964843947607580672
-157,※両手持ち,四ヵ条,,座り技,※両手持ち 四ヵ条,https://x.com/smaurai_kaze/status/1228930410576351232
-158,※両手持ち,側面入身投げ,①,座り技,※両手持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/1228917220870250496
-159,※両手持ち,側面入身投げ,,座り技,※両手持ち 側面入身投げ,https://x.com/smaurai_kaze/status/1297227117873119235
-160,※両手持ち,正面入身投げ,,座り技,※両手持ち 正面入身投げ,https://x.com/smaurai_kaze/status/1297229805411168256
-161,※両手持ち,正面入身投げ,②,座り技,※両手持ち 正面入身投げ ②,https://x.com/smaurai_kaze/status/1099669958487752704
-162,※両手持ち,肘締め,①,座り技,※両手持ち 肘締め ①,https://x.com/smaurai_kaze/status/1464607731885641729
-163,※両手持ち,肘締め,②,座り技,※両手持ち 肘締め ②,https://x.com/smaurai_kaze/status/1064174257570111494
-164,※両手持ち,肘当て呼吸投げ,①,座り技,※両手持ち 肘当て呼吸投げ ①,https://x.com/smaurai_kaze/status/1292341616326463488
-165,※両手持ち,肘当て呼吸投げ,②,座り技,※両手持ち 肘当て呼吸投げ ②,https://x.com/smaurai_kaze/status/802751153557512192
-166,※両手持ち,小手返し,①,座り技,※両手持ち 小手返し ①,https://x.com/smaurai_kaze/status/831511405765406721
-167,※両手持ち,小手返し,②,座り技,※両手持ち 小手返し ②,https://x.com/smaurai_kaze/status/847730023750541312
-168,※両手持ち,天地投げ,①,座り技,※両手持ち 天地投げ ①,https://x.com/smaurai_kaze/status/929632444789039104
-169,※両手持ち,天地投げ,②,座り技,※両手持ち 天地投げ ②,https://x.com/smaurai_kaze/status/995718803194503169
-170,肘持ち,一ヵ条,①,立ち技,肘持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/853220944474546176
-171,肘持ち,一ヵ条,②,立ち技,肘持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/906859361904947200
-172,肘持ち,二ヵ条,①,立ち技,肘持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/818834518928867329
-173,肘持ち,二ヵ条,②,立ち技,肘持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/840921473426505728
-174,肘持ち,三ヵ条,①,立ち技,肘持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/872108675577466883
-175,肘持ち,三ヵ条,②,立ち技,肘持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/848204836621307904
-176,肘持ち,四ヵ条,①,立ち技,肘持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/983001980694970368
-177,肘持ち,四ヵ条,②,立ち技,肘持ち 四ヵ条 ②,https://x.com/smaurai_kaze/status/903719355875074048
-178,肘持ち,側面入身投げ,①,立ち技,肘持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/918051472515801088
-179,肘持ち,側面入身投げ,②,立ち技,肘持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1018542306033405952
-180,肘持ち,肘締め,①,立ち技,肘持ち 肘締め ①,https://x.com/smaurai_kaze/status/1069249862636527616
-181,肘持ち,肘締め,②,立ち技,肘持ち 肘締め ②,https://x.com/smaurai_kaze/status/1190947790639075328
-182,※肘持ち,一ヵ条,①,座り技,※肘持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1119564197652615168
-183,※肘持ち,一ヵ条,②,座り技,※肘持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/1106935349379362817
-184,※肘持ち,二ヵ条,①,座り技,※肘持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/1472531434225414145
-185,※肘持ち,二ヵ条,②,座り技,※肘持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/884051112696795137
-186,※肘持ち,三ヵ条,,座り技,※肘持ち 三ヵ条,
-187,※肘持ち,三ヵ条,②,座り技,※肘持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/1287529053382012928
-188,※肘持ち,四ヵ条,①,座り技,※肘持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/1066345819069005825
-189,※肘持ち,四ヵ条,,座り技,※肘持ち 四ヵ条,
-190,※肘持ち,側面入身投げ,,座り技,※肘持ち 側面入身投げ,
-191,※肘持ち,側面入身投げ,②,座り技,※肘持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1513108718766157824?cxt=HHwWgMDTiZ2X0v8pAAAA
-192,※肘持ち,肘締め,①,座り技,※肘持ち 肘締め ①,https://x.com/smaurai_kaze/status/1014554209176281089
-193,※肘持ち,肘締め,,座り技,※肘持ち 肘締め,
-194,肩持ち,一ヵ条,①,立ち技,肩持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/850989798886002688
-195,肩持ち,一ヵ条,②,立ち技,肩持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/867737082168344579
-196,肩持ち,二ヵ条,①,立ち技,肩持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/857677454332252160
-197,肩持ち,二ヵ条,②,立ち技,肩持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/825716224877219841
-198,肩持ち,三ヵ条,①,立ち技,肩持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/949602589183696896
-199,肩持ち,三ヵ条,②,立ち技,肩持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/1190920515793244160
-200,肩持ち,四ヵ条,①,立ち技,肩持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/975037761022451712
-201,肩持ち,四ヵ条,②,立ち技,肩持ち 四ヵ条 ②,https://x.com/smaurai_kaze/status/855769537618223104
-202,肩持ち,側面入身投げ,①,立ち技,肩持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/838029897750609921
-203,肩持ち,側面入身投げ,②,立ち技,肩持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1078022613518016512
-204,肩持ち,肘締め,①,立ち技,肩持ち 肘締め ①,https://x.com/smaurai_kaze/status/1150355588800401408
-205,肩持ち,肘締め,②,立ち技,肩持ち 肘締め ②,https://x.com/smaurai_kaze/status/1091410692496777216
-206,肩持ち,自由技,○,立ち技,肩持ち 自由技 ○,https://x.com/smaurai_kaze/status/904338595678261249
-207,※肩持ち,一ヵ条,①,座り技,※肩持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1449798934180728834
-208,※肩持ち,一ヵ条,②,座り技,※肩持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/1328002949159690241
-209,※肩持ち,二ヵ条,①,座り技,※肩持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/985841045828091906
-210,※肩持ち,二ヵ条,②,座り技,※肩持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/1332976517949767680
-211,※肩持ち,三ヵ条,①,座り技,※肩持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/1110103641992499200
-212,※肩持ち,三ヵ条,,座り技,※肩持ち 三ヵ条,
-213,※肩持ち,四ヵ条,①,座り技,※肩持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/1335471960134860802
-214,※肩持ち,四ヵ条,,座り技,※肩持ち 四ヵ条,
-215,※肩持ち,側面入身投げ,①,座り技,※肩持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/1151095181157867526
-216,※肩持ち,側面入身投げ,,座り技,※肩持ち 側面入身投げ,
-217,※肩持ち,肘締め,①,座り技,※肩持ち 肘締め ①,https://x.com/smaurai_kaze/status/1151093345378160641
-218,※肩持ち,肘締め,,座り技,※肩持ち 肘締め,
-219,胸持ち,一ヵ条,①,立ち技,胸持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1041664230947090434
-220,胸持ち,一ヵ条,②,立ち技,胸持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/960011527423012864
-221,胸持ち,二ヵ条,①,立ち技,胸持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/896776990597959681
-222,胸持ち,二ヵ条,②,立ち技,胸持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/1304693910388662273
-223,胸持ち,三ヵ条,①,立ち技,胸持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/1059095989485633537
-224,胸持ち,三ヵ条,②,立ち技,胸持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/896776373213184002
-225,胸持ち,四ヵ条,①,立ち技,胸持ち 四ヵ条 ①,https://x.com/smaurai_kaze/status/1102198533870899200
-226,胸持ち,四ヵ条,②,立ち技,胸持ち 四ヵ条 ②,https://x.com/smaurai_kaze/status/937694644065800193
-227,胸持ち,側面入身投げ,①,立ち技,胸持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/1145332648039948288
-228,胸持ち,側面入身投げ,②,立ち技,胸持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1092053453373812736
-229,胸持ち,肘締め,①,立ち技,胸持ち 肘締め ①,https://x.com/smaurai_kaze/status/799990081767342081
-230,胸持ち,肘締め,②,立ち技,胸持ち 肘締め ②,https://x.com/smaurai_kaze/status/797709233177260033
-231,※胸持ち,一ヵ条,①,座り技,※胸持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1276190644105392128
-232,※胸持ち,一ヵ条,②,座り技,※胸持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/1036321495323045889
-233,※胸持ち,二ヵ条,①,座り技,※胸持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/1276191641573879808
-234,※胸持ち,二ヵ条,,座り技,※胸持ち 二ヵ条,
-235,※胸持ち,三ヵ条,,座り技,※胸持ち 三ヵ条,
-236,※胸持ち,三ヵ条,②,座り技,※胸持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/1074332261678342144
-237,※胸持ち,四ヵ条,,座り技,※胸持ち 四ヵ条,
-238,※胸持ち,四ヵ条,②,座り技,※胸持ち 四ヵ条 ②,https://x.com/smaurai_kaze/status/1289932346704056322
-239,※胸持ち,側面入身投げ,①,座り技,※胸持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/1145338088165482498
-240,※胸持ち,側面入身投げ,,座り技,※胸持ち 側面入身投げ,
-241,※胸持ち,肘締め,,座り技,※胸持ち 肘締め,
-242,※胸持ち,肘締め,②,座り技,※胸持ち 肘締め ②,https://x.com/smaurai_kaze/status/900805799911477248
-243,片手綾持ち,二ヵ条,①,立ち技,片手綾持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/853513031434649600
-244,片手綾持ち,二ヵ条,②,立ち技,片手綾持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/805003018580045825
-245,※片手綾持ち,二ヵ条,①,座り技,※片手綾持ち 二ヵ条 ①,https://x.com/smaurai_kaze/status/962707463790145536
-246,※片手綾持ち,二ヵ条,②,座り技,※片手綾持ち 二ヵ条 ②,https://x.com/smaurai_kaze/status/907614880529653760
-247,正面突き,二ヵ条,①,立ち技,正面突き 二ヵ条 ①,https://x.com/smaurai_kaze/status/1289926921707352064
-248,正面突き,二ヵ条,②,立ち技,正面突き 二ヵ条 ②,https://x.com/smaurai_kaze/status/1114948203885916160
-249,正面突き,正面入身投げ,,立ち技,正面突き 正面入身投げ,
-250,正面突き,正面入身投げ,②,立ち技,正面突き 正面入身投げ ②,https://x.com/smaurai_kaze/status/916607026553176067
-251,正面突き,肘当て呼吸投げ,①,立ち技,正面突き 肘当て呼吸投げ ①,https://x.com/smaurai_kaze/status/1194981179637690368
-252,正面突き,肘当て呼吸投げ,②,立ち技,正面突き 肘当て呼吸投げ ②,https://x.com/smaurai_kaze/status/1194983953263808512
-253,正面突き,小手返し,①,立ち技,正面突き 小手返し ①,https://x.com/smaurai_kaze/status/1279804958385160193
-254,正面突き,小手返し,②,立ち技,正面突き 小手返し ②,https://x.com/smaurai_kaze/status/967682685735849984
-255,正面突き,呼吸投げ,○,立ち技,正面突き 呼吸投げ ○,https://x.com/smaurai_kaze/status/1098484276004175873
-256,正面突き,自由技,○,立ち技,正面突き 自由技 ○,https://x.com/smaurai_kaze/status/775327698042314752
-257,※正面突き,肘当て呼吸投げ,,座り技,※正面突き 肘当て呼吸投げ,
-258,※正面突き,肘当て呼吸投げ,,座り技,※正面突き 肘当て呼吸投げ,
-259,※正面突き,小手返し,①,座り技,※正面突き 小手返し ①,https://x.com/smaurai_kaze/status/1176138778127159296
-260,※正面突き,小手返し,②,座り技,※正面突き 小手返し ②,https://x.com/smaurai_kaze/status/1177959938124943361
-261,後ろ技両手持ち,一ヵ条,①,立ち技,後ろ技両手持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/895932042596171776
-262,後ろ技両手持ち,一ヵ条,②,立ち技,後ろ技両手持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/891672388680663040
-263,後ろ技両手持ち,三ヵ条,①,立ち技,後ろ技両手持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/881772293248008192
-264,後ろ技両手持ち,三ヵ条,②,立ち技,後ろ技両手持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/865565509328097281
-265,後ろ技両手持ち,側面入身投げ,①,立ち技,後ろ技両手持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/957254189100314624
-266,後ろ技両手持ち,側面入身投げ,②,立ち技,後ろ技両手持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/926818543642992643
-267,後ろ技両手持ち,肘締め,①,立ち技,後ろ技両手持ち 肘締め ①,https://x.com/smaurai_kaze/status/988088808640950272
-268,後ろ技両手持ち,肘締め,②,立ち技,後ろ技両手持ち 肘締め ②,https://x.com/smaurai_kaze/status/1023205652280139776
-269,後ろ技両手持ち,肘当て呼吸投げ,①,立ち技,後ろ技両手持ち 肘当て呼吸投げ ①,https://x.com/smaurai_kaze/status/871417542543261698
-270,後ろ技両手持ち,肘当て呼吸投げ,②,立ち技,後ろ技両手持ち 肘当て呼吸投げ ②,https://x.com/smaurai_kaze/status/1061657359125164032
-271,後ろ技両手持ち,小手返し,①,立ち技,後ろ技両手持ち 小手返し ①,https://x.com/smaurai_kaze/status/886606823062552578
-272,後ろ技両手持ち,小手返し,②,立ち技,後ろ技両手持ち 小手返し ②,https://x.com/smaurai_kaze/status/927195331548217344
-273,後ろ技両手持ち,自由技,○,立ち技,後ろ技両手持ち 自由技 ○,https://x.com/smaurai_kaze/status/807850599308029953
-274,後ろ技片手襟持ち,一ヵ条,①,立ち技,後ろ技片手襟持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/914139663102763009
-275,後ろ技片手襟持ち,一ヵ条,②,立ち技,後ろ技片手襟持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/946567740860461056
-276,後ろ技片手襟持ち,三ヵ条,①,立ち技,後ろ技片手襟持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/832994675434803200
-277,後ろ技片手襟持ち,三ヵ条,②,立ち技,後ろ技片手襟持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/1015973234829717504
-278,後ろ技両肘持ち,一ヵ条,①,立ち技,後ろ技両肘持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1021333097818624000
-279,後ろ技両肘持ち,一ヵ条,②,立ち技,後ろ技両肘持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/1071812298853904384
-280,後ろ技両肘持ち,三ヵ条,①,立ち技,後ろ技両肘持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/838378942323044353
-281,後ろ技両肘持ち,三ヵ条,②,立ち技,後ろ技両肘持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/990196175637692416
-282,後ろ技両肘持ち,側面入身投げ,①,立ち技,後ろ技両肘持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/820271456688816128
-283,後ろ技両肘持ち,側面入身投げ,②,立ち技,後ろ技両肘持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1163685030708727808
-284,後ろ技両肘持ち,自由技,○,立ち技,後ろ技両肘持ち 自由技 ○,https://x.com/smaurai_kaze/status/1165664517071597573
-285,後ろ技両肩持ち,一ヵ条,①,立ち技,後ろ技両肩持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/1301309705214554112
-286,後ろ技両肩持ち,一ヵ条,②,立ち技,後ろ技両肩持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/1104444321841872896
-287,後ろ技両肩持ち,三ヵ条,①,立ち技,後ろ技両肩持ち 三ヵ条 ①,https://x.com/smaurai_kaze/status/1081448108796473344
-288,後ろ技両肩持ち,三ヵ条,②,立ち技,後ろ技両肩持ち 三ヵ条 ②,https://x.com/smaurai_kaze/status/1314970134692335616
-289,後ろ技両肩持ち,側面入身投げ,①,立ち技,後ろ技両肩持ち 側面入身投げ ①,https://x.com/smaurai_kaze/status/1312680091273502721
-290,後ろ技両肩持ち,側面入身投げ,②,立ち技,後ろ技両肩持ち 側面入身投げ ②,https://x.com/smaurai_kaze/status/1152631923644063744
-291,後ろ技両肩持ち,自由技,○,立ち技,後ろ技両肩持ち 自由技 ○,https://x.com/smaurai_kaze/status/1150551953543294977
-292,後ろ技襟持ち,一ヵ条,①,立ち技,後ろ技襟持ち 一ヵ条 ①,https://x.com/smaurai_kaze/status/962720713864982528
-293,後ろ技襟持ち,一ヵ条,②,立ち技,後ろ技襟持ち 一ヵ条 ②,https://x.com/smaurai_kaze/status/911531224098672640
-294,後ろ技襟持ち,肘締め,①,立ち技,後ろ技襟持ち 肘締め ①,https://x.com/smaurai_kaze/status/1304688737071165442
-295,後ろ技襟持ち,肘締め,②,立ち技,後ろ技襟持ち 肘締め ②,https://x.com/smaurai_kaze/status/1308097622087925760
-296,半身半立ち片手持ち,四方投げ,①,立ち技,半身半立ち片手持ち 四方投げ ①,https://x.com/smaurai_kaze/status/914535424357416960
-297,半身半立ち片手持ち,四方投げ,②,立ち技,半身半立ち片手持ち 四方投げ ②,https://x.com/smaurai_kaze/status/1114947856803160064
-298,半身半立ち両手持ち,四方投げ,○,立ち技,半身半立ち両手持ち 四方投げ ○,https://x.com/smaurai_kaze/status/811223993667567616
-299,肩持ち正面打ち,四方投げ,①,立ち技,肩持ち正面打ち 四方投げ ①,https://x.com/smaurai_kaze/status/894227134381555716
-300,肩持ち正面打ち,四方投げ,②,立ち技,肩持ち正面打ち 四方投げ ②,https://x.com/smaurai_kaze/status/1028338154976161792
-301,正面横面打ち,自由技,○,立ち技,正面横面打ち 自由技 ○,https://x.com/smaurai_kaze/status/891261684467105793
-302,短刀取り,自由技,○,立ち技,短刀取り 自由技 ○,https://x.com/smaurai_kaze/status/835854739648593921
-303,短刀横面取り,自由技,○,立ち技,短刀横面取り 自由技 ○,https://x.com/smaurai_kaze/status/909458661927403520
-304,剣取り,自由技,○,立ち技,剣取り 自由技 ○,https://x.com/smaurai_kaze/status/923911113342717953
-305,２人取り,自由技,○,立ち技,２人取り 自由技 ○,https://x.com/smaurai_kaze/status/830781308271890433
-306,３人取り,自由技,○,立ち技,３人取り 自由技 ○,https://x.com/smaurai_kaze/status/923909586964201472`;
+    const RAW_CSV_TEXT = window.RAW_CSV_TEXT || '';
 
     function inferGrades(rawGrip, name, stance, numberLabel) {
-      const gripStr = rawGrip || '';
-      const nameStr = name || '';
+      const grip = rawGrip || '';
+      const n = name || '';
+      const num = numberLabel || '';
+      const isSuwari = grip.startsWith('※') || stance === '座り技';
+      const cleanGrip = grip.replace(/^※/, '');
 
-      // 高段位・発展技 (後ろ技, 半身半立ち, 短刀, 剣, 複数人取り, 自由技)
+      // 特殊技（短刀・剣・多人数・自由技・半身半立ち）
       if (
-        gripStr.includes('後ろ技') ||
-        gripStr.includes('半身半立ち') ||
-        gripStr.includes('短刀') ||
-        gripStr.includes('剣') ||
-        gripStr.includes('取り') ||
-        nameStr.includes('自由技')
+        cleanGrip.includes('短刀') ||
+        cleanGrip.includes('剣') ||
+        cleanGrip.includes('取り') ||
+        cleanGrip.includes('半身半立ち') ||
+        n.includes('自由技')
       ) {
         return ['初段', '二段', '三段', '少年初段'];
       }
 
-      // 上級・高難度技 (四ヵ条, 肘当て呼吸投げ, 正面突き, 胸持ち)
+      // 後ろ技
+      if (cleanGrip.startsWith('後ろ技') || cleanGrip.startsWith('後技')) {
+        if (cleanGrip.includes('両手持ち') && (n.includes('一ヵ条') || n.includes('小手返し'))) {
+          return ['1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+        }
+        return ['初段', '二段', '三段', '少年初段'];
+      }
+
+      // 座り技
+      if (isSuwari) {
+        if (cleanGrip === '正面打ち') {
+          if (n.includes('一ヵ条')) return ['5・6級', '4級', '3級', '2級', '1級', '初段', '二段', '三段', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段'];
+          if (n.includes('二ヵ条')) return ['4級', '3級', '2級', '1級', '初段', '二段', '三段', '少年3・4級', '少年2・1級', '少年初段'];
+          if (n.includes('三ヵ条')) return ['3級', '2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+          if (n.includes('四ヵ条')) return ['2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+          return ['2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+        }
+        if (cleanGrip === '横面打ち') {
+          if (n.includes('一ヵ条')) return ['2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+          if (n.includes('二ヵ条')) return ['1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+          return ['初段', '二段', '三段', '少年初段'];
+        }
+        if (cleanGrip === '片手持ち') {
+          if (n.includes('一ヵ条')) return ['1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+          return ['初段', '二段', '三段', '少年初段'];
+        }
+        return ['初段', '二段', '三段', '少年初段'];
+      }
+
+      // 立ち技：級別判定
       if (
-        nameStr.includes('四ヵ条') ||
-        nameStr.includes('肘当て呼吸投げ') ||
-        gripStr.includes('正面突き') ||
-        gripStr.includes('胸持ち')
+        (cleanGrip === '片手持ち' && (n.includes('四方投げ') || (n.includes('側面入身投げ') && num === '①') || (n.includes('肘締め') && num === '①'))) ||
+        (cleanGrip === '正面打ち' && (n.includes('一ヵ条') || (n.includes('正面入身投げ') && num === '①'))) ||
+        (cleanGrip === '両手持ち' && n.includes('天地投げ'))
       ) {
-        return ['2級', '1級', '初段', '二段', '少年2・1級', '少年初段'];
+        return ['7・8級', '5・6級', '4級', '3級', '2級', '1級', '初段', '二段', '三段', '少年7級', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段'];
       }
 
-      // 中級技 (二ヵ条, 三ヵ条, 肩持ち, 両手持ち, 片手綾持ち)
       if (
-        nameStr.includes('二ヵ条') ||
-        nameStr.includes('三ヵ条') ||
-        gripStr.includes('肩持ち') ||
-        gripStr.includes('両手持ち') ||
-        gripStr.includes('片手綾持ち')
+        (cleanGrip === '正面打ち' && (n.includes('二ヵ条') || n.includes('肘締め'))) ||
+        (cleanGrip === '片手持ち' && n.includes('二ヵ条')) ||
+        (cleanGrip === '横面打ち' && n.includes('四方投げ')) ||
+        (cleanGrip === '肩持ち' && n.includes('一ヵ条')) ||
+        (cleanGrip === '両手持ち' && n.includes('四方投げ'))
       ) {
-        return ['4級', '3級', '2級', '1級', '少年3・4級', '少年2・1級'];
+        return ['5・6級', '4級', '3級', '2級', '1級', '初段', '二段', '三段', '少年5・6級', '少年3・4級', '少年2・1級', '少年初段'];
       }
 
-      // 初級基本技 (片手持ち, 正面打ちの一ヵ条・四方投げ・肘締め①等)
-      if (numberLabel === '①' || numberLabel === '1') {
-        return ['7・8級', '5・6級', '4級', '3級', '2級', '1級', '初段', '少年7級', '少年5・6級', '少年3・4級'];
+      if (
+        (cleanGrip === '正面打ち' && n.includes('三ヵ条')) ||
+        (cleanGrip === '横面打ち' && n.includes('一ヵ条')) ||
+        (cleanGrip === '両手持ち' && n.includes('二ヵ条')) ||
+        (cleanGrip === '肘持ち' && n.includes('一ヵ条')) ||
+        (cleanGrip === '片手持ち' && n.includes('小手返し'))
+      ) {
+        return ['4級', '3級', '2級', '1級', '初段', '二段', '三段', '少年3・4級', '少年2・1級', '少年初段'];
       }
 
-      // 標準技 (②区分、小手返し、側面入身投げ等)
-      return ['5・6級', '4級', '3級', '2級', '1級', '初段', '少年5・6級', '少年3・4級', '少年2・1級'];
+      if (
+        (cleanGrip === '正面打ち' && (n.includes('四ヵ条') || n.includes('小手返し') || n.includes('側面入身投げ'))) ||
+        (cleanGrip === '横面打ち' && n.includes('二ヵ条')) ||
+        (cleanGrip === '肩持ち' && n.includes('二ヵ条')) ||
+        (cleanGrip === '胸持ち' && n.includes('一ヵ条'))
+      ) {
+        return ['3級', '2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+      }
+
+      if (
+        (cleanGrip === '横面打ち' && (n.includes('三ヵ条') || n.includes('側面入身投げ'))) ||
+        (cleanGrip === '肘持ち' && n.includes('二ヵ条')) ||
+        (cleanGrip === '正面突き' && n.includes('二ヵ条')) ||
+        (cleanGrip === '両手持ち' && n.includes('三ヵ条')) ||
+        (cleanGrip === '片手綾持ち' && n.includes('二ヵ条'))
+      ) {
+        return ['2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+      }
+
+      if (
+        (cleanGrip === '横面打ち' && n.includes('四ヵ条')) ||
+        (cleanGrip === '肩持ち' && n.includes('三ヵ条')) ||
+        (cleanGrip === '胸持ち' && n.includes('二ヵ条')) ||
+        (cleanGrip === '正面突き' && n.includes('小手返し'))
+      ) {
+        return ['1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
+      }
+
+      if (
+        (cleanGrip === '肩持ち' && n.includes('四ヵ条')) ||
+        (cleanGrip === '胸持ち' && (n.includes('三ヵ条') || n.includes('四ヵ条'))) ||
+        (cleanGrip === '正面打ち' && n.includes('肘当て呼吸投げ'))
+      ) {
+        return ['初段', '二段', '三段', '少年初段'];
+      }
+
+      return ['3級', '2級', '1級', '初段', '二段', '三段', '少年2・1級', '少年初段'];
     }
 
     function parseCsvToTechniques(csvText) {
+      if (!csvText) return [];
       const lines = csvText.trim().split('\n');
       const techniques = [];
 
       lines.forEach((line, index) => {
-        const parts = line.split(',');
+        if (!line.trim()) return;
+        const parts = line.split(',').map(s => s ? s.trim() : '');
         if (parts.length < 4) return;
+
+        const firstCol = parts[0];
+        if (firstCol === 'No' || firstCol === '持ち手' || firstCol === '技名1') {
+          return; // Skip header
+        }
 
         let rawGrip = '';
         let name = '';
         let numberLabel = '';
-        let rawVideoUrl = '';
         let stanceFromCsv = '';
         let displayNameFromCsv = '';
+        let rawVideoUrl = '';
+        let gradeColStartIndex = -1;
 
-        if (parts[0].trim() === 'No' || parts[0].trim() === '持ち手') {
-          return; // Skip header
-        }
-
-        // Check if 7 column format: No,持ち手,技名,①②区分,種別,技名表記,動画URL
-        if (!isNaN(parseInt(parts[0].trim(), 10)) && parts.length >= 7) {
-          rawGrip = parts[1] ? parts[1].trim() : '';
-          name = parts[2] ? parts[2].trim() : '';
-          numberLabel = parts[3] ? parts[3].trim() : '';
-          stanceFromCsv = parts[4] ? parts[4].trim() : '';
-          displayNameFromCsv = parts[5] ? parts[5].trim() : '';
-          rawVideoUrl = parts[6] ? parts[6].trim() : '';
+        if (!isNaN(parseInt(firstCol, 10)) && parts.length >= 7) {
+          // Format 1: No,持ち手,技名,①②区分,種別,技名表記,動画URL
+          rawGrip = parts[1];
+          name = parts[2];
+          numberLabel = parts[3];
+          stanceFromCsv = parts[4];
+          displayNameFromCsv = parts[5];
+          rawVideoUrl = parts[6];
+          gradeColStartIndex = 7;
+        } else if (parts[3] && (parts[3].startsWith('http') || parts[3].includes('x.com') || parts[3] === 'URL')) {
+          // Format 2: 技名1,技名2,技名3,URL,少年7級... (19-col CSV with URL at index 3, grade cols index 4 to 18)
+          rawGrip = parts[0];
+          name = parts[1];
+          numberLabel = parts[2];
+          rawVideoUrl = parts[3];
+          gradeColStartIndex = 4;
+        } else if (parts.length >= 19) {
+          // Format 3: 持ち手,技名,①②区分,種別,少年7級...
+          rawGrip = parts[0];
+          name = parts[1];
+          numberLabel = parts[2];
+          stanceFromCsv = parts[3];
+          displayNameFromCsv = `${rawGrip} ${name} ${numberLabel}`.trim();
+          gradeColStartIndex = 4;
         } else {
-          rawGrip = parts[0] ? parts[0].trim() : '';
-          name = parts[1] ? parts[1].trim() : '';
-          numberLabel = parts[2] ? parts[2].trim() : '';
-          rawVideoUrl = parts[3] ? parts[3].trim() : '';
+          // Fallback: 技名1,技名2,技名3,URL,...
+          rawGrip = parts[0];
+          name = parts[1];
+          numberLabel = parts[2];
+          rawVideoUrl = parts[3] || '';
+          gradeColStartIndex = 4;
         }
 
         if (!rawGrip && !name) return;
@@ -605,20 +391,16 @@
         }
 
         let grades = [];
-        // Optional grade columns parsing if extra columns exist
-        if (parts.length > 7) {
+        if (gradeColStartIndex >= 0 && parts.length >= gradeColStartIndex) {
           for (let i = 0; i < GRADE_COLUMNS.length; i++) {
-            const val = parts[7 + i] ? parts[7 + i].trim() : '';
-            if (val === '1' || val === '○' || val === '①' || val === '②') {
+            const val = parts[gradeColStartIndex + i] ? parts[gradeColStartIndex + i].trim() : '';
+            if (val !== '' && val !== '0' && val !== 'false' && val !== '×' && val !== '-') {
               grades.push(GRADE_COLUMNS[i]);
             }
           }
         }
 
-        if (grades.length === 0) {
-          grades = inferGrades(rawGrip, name, stanceFromCsv, numberLabel);
-        }
-
+        // CSVの各級段カラム（E列〜S列）に「1」がある場合のみ、該当級段に割り当てる
         const primaryGrade = grades.length > 0 ? grades[0] : '';
         const displayName = displayNameFromCsv || `${rawGrip} ${name} ${numberLabel}`.trim();
 
@@ -641,7 +423,7 @@
           grades,
           category: isSuwariWaza ? '座り技' : '立ち技',
           reading: '',
-          difficultyRating: grades.includes('初段') || grades.includes('二段') || grades.includes('三段') ? 4 : 2,
+          difficultyRating: grades.some(g => g.includes('初段') || g.includes('二段') || g.includes('三段')) ? 4 : 2,
           isMastered: false,
           isFavorite: false
         });
@@ -651,7 +433,7 @@
     }
 
     const INITIAL_TECHNIQUES = parseCsvToTechniques(RAW_CSV_TEXT);
-    const LOCAL_STORAGE_KEY = 'aistudio_techniques_v13_prod';
+    const LOCAL_STORAGE_KEY = 'aistudio_techniques_v17_csv_exact';
 
     // 文字列の正規化（全角・半角、カタカナ・ひらがな、漢数字・丸数字、スペース除去など）
     function normalizeText(str) {
@@ -703,36 +485,10 @@
       return INITIAL_TECHNIQUES;
     }
 
-    const INITIAL_NOTIFICATIONS = [
-      {
-        id: 'notif-1',
-        title: '塩田合気道・風 データ連携完了',
-        message: '全306技の型データおよび技動画リンクを正常に読み込みました。',
-        timestamp: '2026-08-11 12:00',
-        isRead: false,
-        type: 'system'
-      },
-      {
-        id: 'notif-2',
-        title: '審査科目一覧の確認',
-        message: '各級段位のフィルタ機能を利用して、審査に必要な技を素早くチェックできます。',
-        timestamp: '2026-08-11 11:30',
-        isRead: false,
-        type: 'info'
-      }
-    ];
-
     // --- COMPONENTS ---
 
     // Header
-    const Header = ({
-      totalCount,
-      masteredCount,
-      onOpenStats,
-      onOpenNotifications,
-      unreadCount,
-      onOpenAddModal
-    }) => {
+    const Header = ({ onOpenAddModal }) => {
       return (
         <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 py-3">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
@@ -751,35 +507,10 @@
             <div className="flex items-center gap-2">
               <button
                 onClick={onOpenAddModal}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#003d9b] hover:bg-[#1e5bb8] text-white font-medium text-xs rounded-lg transition-colors shadow-xs"
               >
-                <Icon name="plus" className="w-4 h-4 text-slate-600" />
+                <Icon name="plus" className="w-4 h-4 text-white" />
                 <span>技を追加</span>
-              </button>
-
-              <button
-                onClick={onOpenStats}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-[#003d9b] font-medium text-xs rounded-lg transition-colors border border-indigo-100"
-                title="習得状況・統計"
-              >
-                <Icon name="barChart" className="w-4 h-4 text-[#003d9b]" />
-                <span className="hidden md:inline">進捗統計</span>
-                <span className="bg-white px-1.5 py-0.5 rounded-full text-[10px] font-bold text-[#003d9b] shadow-xs">
-                  {masteredCount}/{totalCount}
-                </span>
-              </button>
-
-              <button
-                onClick={onOpenNotifications}
-                className="relative p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
-                title="通知一覧"
-              >
-                <Icon name="bell" className="w-4 h-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center animate-pulse">
-                    {unreadCount}
-                  </span>
-                )}
               </button>
             </div>
           </div>
@@ -788,7 +519,7 @@
     };
 
     // SearchBar
-    const SearchBar = ({ searchMode, onSearchChange, stanceFilter, onStanceFilterChange, filterFavoritesOnly, onToggleFavoritesOnly, onExportCsv }) => {
+    const SearchBar = ({ searchMode, onSearchChange, stanceFilter, onStanceFilterChange, filterFavoritesOnly, onToggleFavoritesOnly }) => {
       const stanceOptions = ['全部', '立ち技のみ', '座り技のみ'];
 
       return (
@@ -850,18 +581,6 @@
                 <Icon name="star" className={`w-3.5 h-3.5 ${filterFavoritesOnly ? 'text-amber-500 fill-amber-500' : 'text-slate-400'}`} />
                 <span>お気に入り</span>
               </button>
-
-              {onExportCsv && (
-                <button
-                  type="button"
-                  onClick={onExportCsv}
-                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-all touch-manipulation"
-                  title="表示中の技と動画リンクの対応表をCSVダウンロード"
-                >
-                  <Icon name="download" className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="hidden sm:inline">CSV出力</span>
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -1272,155 +991,10 @@
       );
     };
 
-    // StatsDrawer
-    const StatsDrawer = ({ isOpen, onClose, techniques, onSelectGradeFilter }) => {
-      if (!isOpen) return null;
-
-      const total = techniques.length;
-      const mastered = techniques.filter(t => t.isMastered).length;
-      const overallPct = total > 0 ? Math.round((mastered / total) * 100) : 0;
-
-      const gradeStats = ALL_GRADES.filter(g => g !== 'すべて').map(g => {
-        const list = techniques.filter(t => t.grades ? t.grades.includes(g) : t.grade === g);
-        const tCount = list.length;
-        const mCount = list.filter(t => t.isMastered).length;
-        const pct = tCount > 0 ? Math.round((mCount / tCount) * 100) : 0;
-        return { grade: g, total: tCount, mastered: mCount, pct };
-      });
-
-      return (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white w-full max-w-md h-full p-5 shadow-2xl overflow-y-auto space-y-5 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Icon name="barChart" className="w-5 h-5 text-[#003d9b]" />
-                  <h2 className="text-lg font-bold text-slate-800">習得進捗・統計データ</h2>
-                </div>
-                <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-                  <Icon name="x" className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Overall Progress */}
-              <div className="bg-gradient-to-br from-[#003d9b] to-[#1e5bb8] p-4 rounded-xl text-white space-y-2 shadow-md">
-                <div className="flex items-center justify-between text-xs text-indigo-100">
-                  <span>全306技の総合達成率</span>
-                  <span className="font-bold text-sm text-white">{overallPct}%</span>
-                </div>
-                <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-400 rounded-full transition-all duration-500"
-                    style={{ width: `${overallPct}%` }}
-                  />
-                </div>
-                <p className="text-[11px] text-indigo-100 font-medium pt-1">
-                  達成技数: {mastered} / {total} 技
-                </p>
-              </div>
-
-              {/* Grade Stats */}
-              <div className="space-y-2">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">級段位別の進捗状況</h3>
-                <div className="space-y-2">
-                  {gradeStats.map(({ grade, total, mastered, pct }) => (
-                    <div
-                      key={grade}
-                      onClick={() => {
-                        onSelectGradeFilter(grade);
-                        onClose();
-                      }}
-                      className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl cursor-pointer transition-colors space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                        <span>{grade}</span>
-                        <span className="text-[#003d9b] font-bold">{mastered}/{total} ({pct}%)</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#003d9b] rounded-full transition-all"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors"
-            >
-              閉じる
-            </button>
-          </div>
-        </div>
-      );
-    };
-
-    // NotificationsDrawer
-    const NotificationsDrawer = ({ isOpen, onClose, notifications, onMarkAllAsRead }) => {
-      if (!isOpen) return null;
-
-      return (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white w-full max-w-sm h-full p-5 shadow-2xl overflow-y-auto space-y-4 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <Icon name="bell" className="w-5 h-5 text-[#003d9b]" />
-                  <h2 className="text-lg font-bold text-slate-800">お知らせ・アップデート</h2>
-                </div>
-                <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-                  <Icon name="x" className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-2.5">
-                {notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    className={`p-3.5 rounded-xl border text-xs space-y-1 transition-all ${
-                      n.isRead
-                        ? 'bg-slate-50 border-slate-200 text-slate-600'
-                        : 'bg-indigo-50/70 border-indigo-200 text-slate-800 font-medium'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between font-bold">
-                      <span className="text-[#003d9b]">{n.title}</span>
-                      <span className="text-[10px] text-slate-400">{n.timestamp}</span>
-                    </div>
-                    <p className="leading-relaxed text-slate-600">{n.message}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <button
-                onClick={onMarkAllAsRead}
-                className="w-full py-2 bg-indigo-50 text-[#003d9b] font-semibold text-xs rounded-xl hover:bg-indigo-100 transition-colors"
-              >
-                すべて既読にする
-              </button>
-              <button
-                onClick={onClose}
-                className="w-full py-2 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors"
-              >
-                閉じる
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
     // --- MAIN APP COMPONENT ---
     function App() {
       const [techniques, setTechniques] = useState(() => loadSavedTechniques());
 
-      const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
       const [selectedGrade, setSelectedGrade] = useState('すべて');
       const [searchQuery, setSearchQuery] = useState('');
       const [stanceFilter, setStanceFilter] = useState('全部');
@@ -1428,8 +1002,6 @@
 
       const [selectedTechnique, setSelectedTechnique] = useState(null);
       const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-      const [isStatsOpen, setIsStatsOpen] = useState(false);
-      const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
       // Save techniques
       useEffect(() => {
@@ -1524,42 +1096,9 @@
         }
       };
 
-      const handleExportCsv = () => {
-        const rows = [['No', '持ち手', '技名', '①②区分', '種別', '技名表記', '動画URL']];
-        filteredTechniques.forEach((t, i) => {
-          rows.push([
-            i + 1,
-            t.rawGrip || '',
-            t.name || '',
-            t.numberLabel || '',
-            t.category || '',
-            t.displayName || '',
-            t.videoUrl || ''
-          ]);
-        });
-        const csvContent = '\uFEFF' + rows.map(r => r.map(c => `"${(c+'').replace(/"/g, '""')}"`).join(',')).join('\r\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '養神館合気道_技と動画リンク対応表.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      };
-
-      const unreadNotifCount = notifications.filter((n) => !n.isRead).length;
-      const masteredCount = techniques.filter((t) => t.isMastered).length;
-
       return (
         <div className="min-h-screen flex flex-col bg-slate-100">
           <Header
-            totalCount={techniques.length}
-            masteredCount={masteredCount}
-            onOpenStats={() => setIsStatsOpen(true)}
-            onOpenNotifications={() => setIsNotificationsOpen(true)}
-            unreadCount={unreadNotifCount}
             onOpenAddModal={() => setIsAddModalOpen(true)}
           />
 
@@ -1571,7 +1110,6 @@
               onStanceFilterChange={setStanceFilter}
               filterFavoritesOnly={filterFavoritesOnly}
               onToggleFavoritesOnly={() => setFilterFavoritesOnly(!filterFavoritesOnly)}
-              onExportCsv={handleExportCsv}
             />
 
             <GradeFilter
@@ -1643,7 +1181,7 @@
             </div>
           </footer>
 
-          {/* Modals & Drawers */}
+          {/* Modals */}
           <VideoModal
             technique={selectedTechnique}
             onClose={() => setSelectedTechnique(null)}
@@ -1655,22 +1193,6 @@
             isOpen={isAddModalOpen}
             onClose={() => setIsAddModalOpen(false)}
             onAddTechnique={handleAddTechnique}
-          />
-
-          <StatsDrawer
-            isOpen={isStatsOpen}
-            onClose={() => setIsStatsOpen(false)}
-            techniques={techniques}
-            onSelectGradeFilter={(g) => setSelectedGrade(g)}
-          />
-
-          <NotificationsDrawer
-            isOpen={isNotificationsOpen}
-            onClose={() => setIsNotificationsOpen(false)}
-            notifications={notifications}
-            onMarkAllAsRead={() =>
-              setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-            }
           />
         </div>
       );
